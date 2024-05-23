@@ -5,6 +5,7 @@ from requests import Session
 import random
 import string
 import streamlit as st
+import os
 
 def generate_password(length=8):
     characters = string.ascii_letters + string.digits + string.punctuation
@@ -42,14 +43,19 @@ def main(cc, mm, yy, cvv):
         }
         response_data = response.json()
         brand = brand_mapping.get(response_data.get("brand", ""))
-        with open('response_data.json', 'r') as f:
-            data = json.load(f)
-            for key, value in data.items():
-                if "bin" == key:
-                    st.write(f"Bin: {cc[:6]}")
-                else:
-                    capitalized_key = key.capitalize()
-                    st.write(f"{capitalized_key}: {value}")
+
+        # Check if the file exists before trying to open it
+        if os.path.exists('response_data.json'):
+            with open('response_data.json', 'r') as f:
+                data = json.load(f)
+                for key, value in data.items():
+                    if "bin" == key:
+                        st.write(f"Bin: {cc[:6]}")
+                    else:
+                        capitalized_key = key.capitalize()
+                        st.write(f"{capitalized_key}: {value}")
+        else:
+            st.write("File 'response_data.json' not found.")
         return brand
 
     email = generate_password()[0]
