@@ -45,17 +45,17 @@ def main(cc, mm, yy, cvv):
         brand = brand_mapping.get(response_data.get("brand", ""))
 
         # Check if the file exists before trying to open it
-        if os.path.exists('response_data.json'):
-            with open('response_data.json', 'r') as f:
-                data = json.load(f)
-                for key, value in data.items():
-                    if "bin" == key:
-                        st.write(f"Bin: {cc[:6]}")
-                    else:
-                        capitalized_key = key.capitalize()
-                        st.write(f"{capitalized_key}: {value}")
-        else:
-            st.write("File 'response_data.json' not found.")
+        # if os.path.exists('response_data.json'):
+        #     with open('response_data.json', 'r') as f:
+        #         data = json.load(f)
+        #         for key, value in data.items():
+        #             if "bin" == key:
+        #                 st.write(f"Bin: {cc[:6]}")
+        #             else:
+        #                 capitalized_key = key.capitalize()
+        #                 st.write(f"{capitalized_key}: {value}")
+        # else:
+        #     st.write("File 'response_data.json' not found.")
         return brand
 
     email = generate_password()[0]
@@ -126,7 +126,7 @@ def main(cc, mm, yy, cvv):
         'Sec-Fetch-Site': 'same-site',
     })
 
-    data = f'type=card&billing_details[name]=maddy+roy&billing_details[email]={email}&card[number]={cc}&card[cvc]={cvv}&card[exp_month]={mm}&card[exp_year]={yy}&guid={guid}&muid={muid}&sid={sid}&key=pk_live_51NF3mmBYmW52Ch0ihxmv7AWOkHvzOk5AM8Th3mYVJeIH7m8XKoPYcbIJEEZpfM8UqpgFABYaWgK2exakF0XWLqxd00TkLXau4H'
+    data = f'type=card&billing_details[name]={name}+{last}&billing_details[email]={email}&card[number]={cc}&card[cvc]={cvv}&card[exp_month]={mm}&card[exp_year]={yy}&guid={guid}&muid={muid}&sid={sid}&key=pk_live_51NF3mmBYmW52Ch0ihxmv7AWOkHvzOk5AM8Th3mYVJeIH7m8XKoPYcbIJEEZpfM8UqpgFABYaWgK2exakF0XWLqxd00TkLXau4H'
 
     r4 = r.post('https://api.stripe.com/v1/payment_methods', headers=headers, data=data)
 
