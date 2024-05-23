@@ -6,7 +6,8 @@ import random
 import string
 import streamlit as st
 import os
-
+name = f"melon{random.randint(1, 200000)}"
+last = f"nakab{random.randint(1, 200000)}"
 def generate_password(length=8):
     characters = string.ascii_letters + string.digits + string.punctuation
     password = ''.join(random.choice(characters) for _ in range(length))
