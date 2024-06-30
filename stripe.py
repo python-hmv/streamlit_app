@@ -21,8 +21,8 @@ def save_users():
         json.dump(users, file)
 
 # Admin credentials
-admin_username = "admin"
-admin_password = "password"
+admin_username = "Maddy"
+admin_password = "Maddy@:-)"
 
 # Streamlit UI
 st.title("MH13CYBER - Credit Card Checker")
