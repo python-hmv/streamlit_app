@@ -22,7 +22,7 @@ def save_users():
 
 # Admin credentials
 admin_username = "Maddy"
-admin_password = "Maddy@:-)"
+admin_password = "M4DD7"
 
 # Streamlit UI
 st.title("MH13CYBER - Credit Card Checker")
