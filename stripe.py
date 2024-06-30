@@ -215,7 +215,7 @@ if st.session_state.user_logged_in:
                 'Sec-Fetch-User': '?1',
             })
 
-                        account_number = "X" * 12 + cc[-4:]
+            account_number = "X" * 12 + cc[-4:]
             password = generate_password()[1]
             email = generate_password()[0]
 
@@ -246,8 +246,7 @@ if st.session_state.user_logged_in:
 
             st.write(f'{result} : {cc}|{mes}|{ano}|{cvv}')
             output_string = f"{cc}|{mes}|{ano}|{cvv} --->> {result} ]n"
-            with open(savelist, "a") as file:  # add live save path
-                file.write(output_string)
+          
 
     if cardlist is not None:
         for line in cardlist:
