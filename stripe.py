@@ -81,7 +81,7 @@ if st.session_state.admin_logged_in:
 if not st.session_state.admin_logged_in:
     with st.form("user_login_form"):
         st.subheader("User Login")
-        telegram_username = st.text_input("Enter your Username")
+        telegram_username = st.text_input("Enter your Telegram Username For Approval")
         user_login = st.form_submit_button("Login")
 
         if user_login and telegram_username:
