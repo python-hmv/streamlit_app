@@ -7,10 +7,10 @@ import streamlit as st
 
 # Streamlit UI
 st.title("MH13CYBER - Credit Card Checker")
-
+st.write('TG :- @mh13cyber2')
+st.write('IG :- @mh13cyb3r')
 # Upload card list file
-cardlist = st.file_uploader("Upload Card List File", type="txt")
-savelist = st.text_input("Enter path to save live cards", value=r"D:\kALI\python\project\telegram bots\cc bot\checker\livecc.txt")
+cardlist = st.file_uploader("Upload Card List File", type="txt") 
 
 # Function to generate email and password
 def generate_password(length=8):
